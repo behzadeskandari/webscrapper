@@ -1,0 +1,6 @@
+@PropertyScraperApi_HostAddress = http://localhost:5223
+
+GET {{PropertyScraperApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
