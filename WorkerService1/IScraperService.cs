@@ -10,7 +10,7 @@ using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
 using webscrapper;
 
-namespace PropertyScraperApi.Service
+namespace WorkerService1.Service
 {
     public interface IScraperService
     {

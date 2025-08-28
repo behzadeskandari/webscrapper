@@ -4,6 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -24,10 +25,12 @@ namespace PropertyScraperApi.Controllers
     {
 
         private readonly IScraperService _scraperService;
+        private readonly IPublishEndpoint _publishEndpoint;
 
-        public ScrapeController(IScraperService scraperService)
+        public ScrapeController(IScraperService scraperService, IPublishEndpoint publishEndpoint)
         {
             _scraperService = scraperService;
+            _publishEndpoint = publishEndpoint;
         }
 
         [HttpPost]
@@ -44,6 +47,16 @@ namespace PropertyScraperApi.Controllers
             }
         }
 
+
+        [HttpPost]
+        public async Task<IActionResult> Scrapes([FromBody] ScrapeRequest request)
+        {
+            for (int page = 1; page <= (request.MaxPages ?? 250); page++)
+            {
+                await _publishEndpoint.Publish(new ScrapePageCommand { PageNumber = page });
+            }
+            return Ok(new { Message = "Scraping tasks queued." });
+        }
     }
 
 }

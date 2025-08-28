@@ -10,4 +10,10 @@ namespace webscrapper
     {
         public int? MaxPages { get; set; }
     }
+
+
+    public record ScrapePageCommand
+    {
+        public int PageNumber { get; init; }
+    }
 }
