@@ -1,3 +1,5 @@
+version: "3.9"
+
 services:
   worker:
     build:
@@ -18,9 +20,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 2g  # Increase to 2GB
+          memory: 2g
         reservations:
           memory: 1g
+
   rabbitmq:
     image: rabbitmq:3-management
     ports:
@@ -28,17 +31,41 @@ services:
       - "15672:15672"
     networks:
       - app-network
+
   mongo:
     image: mongo:7.0
+    user: mongodb:mongodb
+    command: ["--logpath=/var/log/mongodb/mongod.log", "--logappend"]
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+      - ./mongo-logs:/var/log/mongodb
     networks:
       - app-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+        reservations:
+          memory: 1g
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    environment:
+      - MONGO_INITDB_DATABASE=scraper
+
 networks:
   app-network:
-    external: true
-    name: workerservice1_app-network
+    driver: bridge   # Let compose manage the network
+
 volumes:
-  mongo-data:
+  mongo-data:        # Let compose manage the volume

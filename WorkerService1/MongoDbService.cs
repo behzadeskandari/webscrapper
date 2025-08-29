@@ -15,7 +15,7 @@ namespace WorkerService1
 
         public MongoDbService()
         {
-            var client = new MongoClient("mongodb://mongodb:27017");
+            var client = new MongoClient("mongodb://mongo:27017");
             var database = client.GetDatabase("PropertyScraperDb");
             _propertiesCollection = database.GetCollection<Property>("Properties");
         }
