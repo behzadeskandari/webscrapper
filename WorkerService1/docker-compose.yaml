@@ -5,25 +5,40 @@ services:
       dockerfile: Dockerfile
     depends_on:
       - rabbitmq
-      - mongodb
+      - mongo
     environment:
-      - DOTNET_ENVIRONMENT=Production
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+      - MongoDB__ConnectionString=mongodb://mongo:27017
+      - MongoDB__Database=scraper
+    networks:
+      - app-network
     deploy:
-      replicas: 1
-      restart_policy:
-        condition: on-failure
+      resources:
+        limits:
+          memory: 2g  # Increase to 2GB
+        reservations:
+          memory: 1g
   rabbitmq:
-    image: rabbitmq:3-management-alpine
-    platform: linux/amd64
+    image: rabbitmq:3-management
     ports:
       - "5672:5672"
       - "15672:15672"
-  mongodb:
-    image: mongo:8.0
-    platform: linux/amd64
+    networks:
+      - app-network
+  mongo:
+    image: mongo:7.0
     ports:
       - "27017:27017"
     volumes:
-      - mongodb_data:/data/PropertyScraperDb
+      - mongo-data:/data/db
+    networks:
+      - app-network
+networks:
+  app-network:
+    external: true
+    name: workerservice1_app-network
 volumes:
-  mongodb_data:
+  mongo-data:

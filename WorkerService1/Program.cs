@@ -12,17 +12,37 @@ IHost host = Host.CreateDefaultBuilder(args)
             x.AddConsumer<ScrapePageConsumer>();
             x.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host("rabbitmq://rabbitmq");
+                var host = Environment.GetEnvironmentVariable("RABBITMQ_HOST") ?? "rabbitmq";
+                try
+                {
+                    var ipAddress = System.Net.Dns.GetHostAddresses(host).FirstOrDefault()?.ToString() ?? "failed";
+                    Console.WriteLine($"Attempting to connect to RabbitMQ at {host} (IP: {ipAddress})");
+                    cfg.Host(host, h =>
+                    {
+                        h.Username(Environment.GetEnvironmentVariable("RABBITMQ_USER") ?? "guest");
+                        h.Password(Environment.GetEnvironmentVariable("RABBITMQ_PASS") ?? "guest");
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"RabbitMQ connection failed: {ex.Message}");
+                    throw;
+                }
+
+                cfg.UseMessageRetry(r => r.Interval(5, TimeSpan.FromSeconds(10)));
+
                 cfg.ReceiveEndpoint("scrape-page-queue", e =>
                 {
                     e.ConfigureConsumer<ScrapePageConsumer>(context);
+                    e.ConcurrentMessageLimit = 1; // Process one message at a time
+                    e.PrefetchCount = 1;
                 });
             });
         });
-
         services.AddScoped<IScraperService, ScraperService>();
         services.AddSingleton<MongoDbService>();
-        services.AddHostedService<Worker>();
+        services.AddSingleton<Worker>(); // Register Worker as singleton
+        services.AddHostedService<Worker>(provider => provider.GetRequiredService<Worker>());
     })
     .Build();
 
