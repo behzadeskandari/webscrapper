@@ -23,7 +23,7 @@ namespace WorkerService1
                     _logger.LogInformation("Starting background scraping at {time}", DateTimeOffset.Now);
                     Console.WriteLine("Starting background scraping...");
 
-                    const int maxPages = 1;
+                    const int maxPages = 250;
                     for (int page = 1; page <= maxPages; page++)
                     {
                         await _publishEndpoint.Publish(new ScrapePageCommand { PageNumber = page }, stoppingToken);
