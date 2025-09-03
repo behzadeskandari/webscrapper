@@ -18,14 +18,38 @@ namespace WorkerService1
             var client = new MongoClient("mongodb://mongo:27017");
             var database = client.GetDatabase("PropertyScraperDb");
             _propertiesCollection = database.GetCollection<Property>("Properties");
+
+            // Only create index if collection is not empty
+            if (_propertiesCollection.CountDocuments(FilterDefinition<Property>.Empty) > 0)
+            {
+                var indexKeys = Builders<Property>.IndexKeys.Ascending(p => p.Meta_Content);
+
+                var indexOptions = new CreateIndexOptions
+                {
+                    Unique = true,
+                    Sparse = true // skip documents where Meta_Content is null
+                };
+
+                var indexModel = new CreateIndexModel<Property>(indexKeys, indexOptions);
+                _propertiesCollection.Indexes.CreateOne(indexModel);
+            }
         }
 
         public async Task InsertPropertiesAsync(List<Property> properties)
         {
-            if (properties != null && properties.Count > 0)
+            var existingIds = await _propertiesCollection
+               .Find(Builders<Property>.Filter.In(p => p.MlsNumberNoStealth, properties.Select(x => x.MlsNumberNoStealth)))
+               .Project(p => p.MlsNumberNoStealth)
+               .ToListAsync();
+
+            var newProperties = properties
+                .Where(p => !existingIds.Contains(p.MlsNumberNoStealth))
+                .ToList();
+
+            if (newProperties.Count > 0)
             {
-                await _propertiesCollection.InsertManyAsync(properties);
-                Console.WriteLine($"Inserted {properties.Count} properties into MongoDB.");
+                await _propertiesCollection.InsertManyAsync(newProperties);
+                Console.WriteLine($"Inserted {newProperties.Count} properties into MongoDB.");
             }
         }
 
@@ -37,6 +61,16 @@ namespace WorkerService1
         public async Task<List<Property>> GetAllPropertiesAsync()
         {
             return await _propertiesCollection.Find(Builders<Property>.Filter.Empty).ToListAsync();
+        }
+
+        public async Task UpsertPropertiesAsync(List<Property> properties)
+        {
+            foreach (var property in properties)
+            {
+                var filter = Builders<Property>.Filter.Eq(p => p.MlsNumberNoStealth, property.MlsNumberNoStealth);
+                var options = new ReplaceOptions { IsUpsert = true }; // Insert if not exists
+                await _propertiesCollection.ReplaceOneAsync(filter, property, options);
+            }
         }
     }
 }
