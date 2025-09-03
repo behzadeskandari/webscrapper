@@ -64,7 +64,8 @@ services:
       start_period: 30s
     environment:
       - MONGO_INITDB_DATABASE=scraper
-
+      - MONGO_INITDB_ROOT_USERNAME=myuser
+      - MONGO_INITDB_ROOT_PASSWORD=mypassword
   n8n:
     image: n8nio/n8n:latest
     container_name: n8n
@@ -78,7 +79,7 @@ services:
       - WEBHOOK_URL=https://infra-sky.canadacentral.cloudapp.azure.com/
       # Use MongoDB for workflows (if supported in your n8n build)
       - DB_TYPE=mongodb
-      - DB_MONGODB_CONNECTION_URL=mongodb://n8nuser:n8npass@mongo:27017/n8n
+      - DB_MONGODB_CONNECTION_URL=mongodb://myuser:mypassword@mongo:27017/scraper?authSource=admin
     depends_on:
       - mongo
 networks:
