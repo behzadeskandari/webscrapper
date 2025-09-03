@@ -65,21 +65,6 @@ services:
     environment:
       - MONGO_INITDB_DATABASE=scraper
 
-  n8n:
-    image: n8nio/n8n
-    container_name: n8n
-    ports:
-      - "5678:5678"
-    environment:
-      - N8N_BASIC_AUTH_ACTIVE=true
-      - N8N_BASIC_AUTH_USER=admin
-      - N8N_BASIC_AUTH_PASSWORD=secret
-      - DB_TYPE=mongodb
-      - DB_MONGODB_CONNECTION_URL=mongodb://myuser:mypassword@mongo:27017/scraper?authSource=admin
-    depends_on:
-      - mongo
-    restart: unless-stopped
-  
 networks:
   app-network:
     driver: bridge   # Let compose manage the network
