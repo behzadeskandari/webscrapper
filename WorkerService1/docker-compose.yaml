@@ -65,6 +65,22 @@ services:
     environment:
       - MONGO_INITDB_DATABASE=scraper
 
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=infra-sky.canadacentral.cloudapp.azure.com
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://infra-sky.canadacentral.cloudapp.azure.com/
+      # Use MongoDB for workflows (if supported in your n8n build)
+      - DB_TYPE=mongodb
+      - DB_MONGODB_CONNECTION_URL=mongodb://n8nuser:n8npass@mongo:27017/n8n
+    depends_on:
+      - mongo
 networks:
   app-network:
     driver: bridge   # Let compose manage the network
