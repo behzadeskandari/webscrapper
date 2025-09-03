@@ -71,10 +71,10 @@ services:
     container_name: n8n
     restart: always
     ports:
-      - "5678:5678"
+      - "5680:5678"
     environment:
       - N8N_HOST=infra-sky.canadacentral.cloudapp.azure.com
-      - N8N_PORT=5678
+      - N8N_PORT=5680
       - N8N_PROTOCOL=https
       - WEBHOOK_URL=https://infra-sky.canadacentral.cloudapp.azure.com/
       # Use MongoDB for workflows (if supported in your n8n build)
