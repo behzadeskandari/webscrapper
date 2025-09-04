@@ -17,7 +17,7 @@ namespace WorkerService1
         public MongoDbService(IConfiguration configuration)
         {
             var connectionString = configuration.GetValue<string>("MongoDB__ConnectionString")
-           ?? "mongodb://myuser:mypassword@mongo:27017/scraper?authSource=admin";
+           ?? "mongodb://myuser:mypassword@mongo:27017/scraper";
 
             var databaseName = configuration.GetValue<string>("MongoDB__Database")
                 ?? "scraper";

@@ -13,7 +13,7 @@ services:
       - RabbitMQ__Port=5672
       - RabbitMQ__Username=guest
       - RabbitMQ__Password=guest
-      - MongoDB__ConnectionString=mongodb://myuser:mypassword@mongo:27017/scraper?authSource=admin
+      - MongoDB__ConnectionString=mongodb://myuser:mypassword@mongo:27017/scraper
       - MongoDB__Database=scraper
       # - MONGO_INITDB_ROOT_USERNAME=myuser
       # - MONGO_INITDB_ROOT_PASSWORD=mypassword
