@@ -16,14 +16,11 @@ namespace WorkerService1
 
         public MongoDbService(IConfiguration configuration)
         {
-            var connectionString = configuration.GetValue<string>("MongoDB__ConnectionString")
-           ?? "mongodb://myuser:mypassword@mongo:27017/scraper";
-
-            var databaseName = configuration.GetValue<string>("MongoDB__Database")
-                ?? "scraper";
-
+            var connectionString = configuration.GetValue<string>("MongoDB__ConnectionString") ??
+           "mongodb://myuser:mypassword@mongo:27017/scraper?authSource=admin";
+            Console.WriteLine($"Using connection string: {connectionString}");
             var client = new MongoClient(connectionString);
-            var database = client.GetDatabase(databaseName); // <-- now dynamic
+            var database = client.GetDatabase("scraper");
             _propertiesCollection = database.GetCollection<Property>("Properties");
         }
 
