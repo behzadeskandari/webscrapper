@@ -13,32 +13,32 @@ namespace WorkerService1
     public class MongoDbService
     {
         private readonly IMongoCollection<Property> _propertiesCollection;
+        private bool _isInitialized;
 
         public MongoDbService(IConfiguration configuration)
         {
             var connectionString = configuration.GetValue<string>("MongoDB__ConnectionString") ??
-           "mongodb://myuser:mypassword@mongo:27017/scraper?authSource=admin";
-            Console.WriteLine($"Using connection string: {connectionString}");
+                "mongodb://myuser:mypassword@mongo:27017/scraper?authSource=admin";
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase("scraper");
             _propertiesCollection = database.GetCollection<Property>("Properties");
+            _isInitialized = false;
         }
 
-        // Method to create index, called after initialization if needed
-        public async Task CreateIndexAsync()
+        public async Task InitializeAsync()
         {
-            var filter = Builders<Property>.Filter.Empty;
-            var count = await _propertiesCollection.CountDocumentsAsync(filter);
-            if (count > 0)
+            if (!_isInitialized)
             {
-                var indexKeys = Builders<Property>.IndexKeys.Ascending(p => p.Meta_Content);
-                var indexOptions = new CreateIndexOptions
+                var filter = Builders<Property>.Filter.Empty;
+                var count = await _propertiesCollection.CountDocumentsAsync(filter);
+                if (count > 0)
                 {
-                    Unique = true,
-                    Sparse = true // skip documents where Meta_Content is null
-                };
-                var indexModel = new CreateIndexModel<Property>(indexKeys, indexOptions);
-                await _propertiesCollection.Indexes.CreateOneAsync(indexModel);
+                    var indexKeys = Builders<Property>.IndexKeys.Ascending(p => p.Meta_Content);
+                    var indexOptions = new CreateIndexOptions { Unique = true, Sparse = true };
+                    var indexModel = new CreateIndexModel<Property>(indexKeys, indexOptions);
+                    await _propertiesCollection.Indexes.CreateOneAsync(indexModel);
+                }
+                _isInitialized = true;
             }
         }
 
