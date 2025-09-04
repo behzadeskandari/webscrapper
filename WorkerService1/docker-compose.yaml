@@ -62,10 +62,10 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-    # environment:
-    #   - MONGO_INITDB_DATABASE=scraper
-    #   - MONGO_INITDB_ROOT_USERNAME=myuser
-    #   - MONGO_INITDB_ROOT_PASSWORD=mypassword
+    environment:
+      - MONGO_INITDB_DATABASE=scraper
+      - MONGO_INITDB_ROOT_USERNAME=myuser
+      - MONGO_INITDB_ROOT_PASSWORD=mypassword
   # n8n:
   #   image: n8nio/n8n:latest
   #   container_name: n8n
