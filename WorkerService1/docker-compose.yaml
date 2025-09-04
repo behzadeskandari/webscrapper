@@ -36,7 +36,6 @@ services:
 
   mongo:
     image: mongo:7.0
-    user: mongodb:mongodb
     command: ["--logpath=/var/log/mongodb/mongod.log", "--logappend"]
     ports:
       - "27017:27017"

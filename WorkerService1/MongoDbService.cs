@@ -16,10 +16,14 @@ namespace WorkerService1
 
         public MongoDbService(IConfiguration configuration)
         {
-            var connectionString = configuration.GetValue<string>("MongoDB__ConnectionString") ??
-                "mongodb://myuser:mypassword@mongo:27017/scraper?authSource=admin";
+            var connectionString = configuration.GetValue<string>("MongoDB__ConnectionString")
+           ?? "mongodb://myuser:mypassword@mongo:27017/scraper?authSource=admin";
+
+            var databaseName = configuration.GetValue<string>("MongoDB__Database")
+                ?? "scraper";
+
             var client = new MongoClient(connectionString);
-            var database = client.GetDatabase("scraper"); // Match docker-compose.yml
+            var database = client.GetDatabase(databaseName); // <-- now dynamic
             _propertiesCollection = database.GetCollection<Property>("Properties");
         }
 
