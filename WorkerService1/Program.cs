@@ -47,7 +47,7 @@ using WorkerService1;
 
         // Original worker service setup
         IHost host = Host.CreateDefaultBuilder(args)
-            .ConfigureServices(services =>
+            .ConfigureServices((hostContext, services) =>
             {
                 services.AddMassTransit(x =>
                 {
@@ -78,8 +78,10 @@ using WorkerService1;
                             e.ConcurrentMessageLimit = 1;
                             e.PrefetchCount = 1;
                         });
+                        services.AddSingleton<IConfiguration>(hostContext.Configuration);
                     });
                 });
+
                 services.AddScoped<IScraperService, ScraperService>();
                 services.AddSingleton<MongoDbService>();
                 services.AddSingleton<Worker>();
@@ -87,7 +89,12 @@ using WorkerService1;
             })
             .Build();
 
-        await host.RunAsync();
+            using (var scope = host.Services.CreateScope())
+            {
+                var mongoService = scope.ServiceProvider.GetRequiredService<MongoDbService>();
+                await mongoService.CreateIndexAsync(); // Create index after startup
+            }
+await host.RunAsync();
  
 //IHost host = Host.CreateDefaultBuilder(args)
 //    .ConfigureServices(services =>
