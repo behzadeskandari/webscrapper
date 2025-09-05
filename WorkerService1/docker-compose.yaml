@@ -36,7 +36,7 @@ services:
 
   mongo:
     image: mongo:7.0
-    command: ["--logpath=/var/log/mongodb/mongod.log", "--logappend"]
+    command: ["--logpath=/var/log/mongodb/mongod.log", "--logappend", "--bind_ip_all"]
     ports:
       - "27017:27017"
     volumes:
