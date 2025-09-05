@@ -27,7 +27,7 @@ using WorkerService1;
             try
             {
                 // Initialize MongoDbService
-                var mongoDbService = new MongoDbService();
+                var mongoDbService = new MongoDbService(configuration);
 
                 // Generate seed data
                 var properties = PropertySeedData.GenerateSeedData(5);
@@ -92,7 +92,7 @@ using WorkerService1;
             using (var scope = host.Services.CreateScope())
             {
                 var mongoService = scope.ServiceProvider.GetRequiredService<MongoDbService>();
-                await mongoService.CreateIndexAsync(); // Create index after startup
+                await mongoService.InitializeAsync(); // Create index after startup
             }
 await host.RunAsync();
  
