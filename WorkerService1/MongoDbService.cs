@@ -44,13 +44,13 @@ namespace WorkerService1
 
         public async Task InsertPropertiesAsync(List<Property> properties)
         {
-            var existingIds = await _propertiesCollection
-                .Find(Builders<Property>.Filter.In(p => p.MlsNumberNoStealth, properties.Select(x => x.MlsNumberNoStealth)))
-                .Project(p => p.MlsNumberNoStealth)
+            var existingUrls = await _propertiesCollection
+                .Find(Builders<Property>.Filter.In(p => p.Property_URl, properties.Select(x => x.Property_URl)))
+                .Project(p => p.Property_URl)
                 .ToListAsync();
 
             var newProperties = properties
-                .Where(p => !existingIds.Contains(p.MlsNumberNoStealth))
+                .Where(p => !existingUrls.Contains(p.Property_URl))
                 .ToList();
 
             if (newProperties.Count > 0)
@@ -59,6 +59,24 @@ namespace WorkerService1
                 Console.WriteLine($"Inserted {newProperties.Count} properties into MongoDB.");
             }
         }
+
+        //public async Task InsertPropertiesAsync(List<Property> properties)
+        //{
+        //    var existingIds = await _propertiesCollection
+        //        .Find(Builders<Property>.Filter.In(p => p.MlsNumberNoStealth, properties.Select(x => x.MlsNumberNoStealth)))
+        //        .Project(p => p.MlsNumberNoStealth)
+        //        .ToListAsync();
+
+        //    var newProperties = properties
+        //        .Where(p => !existingIds.Contains(p.MlsNumberNoStealth))
+        //        .ToList();
+
+        //    if (newProperties.Count > 0)
+        //    {
+        //        await _propertiesCollection.InsertManyAsync(newProperties);
+        //        Console.WriteLine($"Inserted {newProperties.Count} properties into MongoDB.");
+        //    }
+        //}
 
         public async Task<long> GetPropertiesCountAsync()
         {
