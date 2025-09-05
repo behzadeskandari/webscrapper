@@ -72,6 +72,7 @@ services:
     restart: always
     ports:
       - "5680:5678"
+      - "5679:5679"
     environment:
       - N8N_HOST=0.0.0.0  # Listen on all interfaces
       - N8N_PORT=5678    # Internal port (mapped to 5680 on host)
