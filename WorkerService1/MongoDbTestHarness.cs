@@ -13,7 +13,7 @@ namespace WorkerService1
             try
             {
                 // Initialize MongoDbService
-                var mongoDbService = new MongoDbService();
+                var mongoDbService = new MongoDbService(configuration);
 
                 // Generate seed data
                 var properties = PropertySeedData.GenerateSeedData(5);
