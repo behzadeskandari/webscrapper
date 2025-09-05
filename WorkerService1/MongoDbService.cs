@@ -18,7 +18,7 @@ namespace WorkerService1
         public MongoDbService(IConfiguration configuration)
         {
             var connectionString = configuration.GetValue<string>("MongoDB__ConnectionString") ??
-                "mongodb://myuser:mypassword@mongo:27017/scraper?authSource=admin";
+                "mongodb://myuser:mypassword@mongo:27017/scraper?authSource=admin&authMechanism=SCRAM-SHA-1";
             var client = new MongoClient(connectionString);
             var database = client.GetDatabase("scraper");
             _propertiesCollection = database.GetCollection<Property>("Properties");

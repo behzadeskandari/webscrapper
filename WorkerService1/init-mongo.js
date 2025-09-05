@@ -10,7 +10,8 @@ db.createUser({
   roles: [
     { role: "readWrite", db: "scraper" },
     { role: "dbAdmin", db: "scraper" }
-  ]
+  ],
+  mechanisms: ["SCRAM-SHA-1", "SCRAM-SHA-256"]
 });
 
 // Switch to scraper database
