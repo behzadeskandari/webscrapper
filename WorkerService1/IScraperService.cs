@@ -147,12 +147,19 @@ namespace WorkerService1.Service
                                 Price = detailDoc.DocumentNode.SelectSingleNode("//meta[@itemprop='price']")?.GetAttributeValue("content", ""),
                                 Category = detailDoc.DocumentNode.SelectSingleNode("//div[@itemprop='category']//div")?.InnerText.Trim(),
                                 Address = detailDoc.DocumentNode.SelectNodes("//div[@class='address']//div") is HtmlNodeCollection addressNodes && addressNodes.Count >= 2
-                                    ? $"{addressNodes[0]?.InnerText.Trim()}, {addressNodes[1]?.InnerText.Trim()}"
-                                    : "",
+        ? $"{addressNodes[0]?.InnerText.Trim()}, {addressNodes[1]?.InnerText.Trim()}"
+        : "",
                                 Orgazination_Name = detailDoc.DocumentNode.SelectSingleNode("//p[@class='organisation-name']")?.InnerText.Trim(),
                                 Amenities = new Dictionary<string, string>(),
                                 Latetude = detailDoc.DocumentNode.SelectSingleNode("//span[@class='ll-match-score noAnimation']")?.GetAttributeValue("data-lat", ""),
-                                Longitude = detailDoc.DocumentNode.SelectSingleNode("//span[@class='ll-match-score noAnimation']")?.GetAttributeValue("data-lng", "")
+                                Longitude = detailDoc.DocumentNode.SelectSingleNode("//span[@class='ll-match-score noAnimation']")?.GetAttributeValue("data-lng", ""),
+                                // فیلدهای جدید
+                                Description = detailDoc.DocumentNode.SelectSingleNode("//div[@itemprop='description']")?.InnerText.Trim(),
+                                FinancialDetails = new Dictionary<string, string>(),
+                                BrokerName = detailDoc.DocumentNode.SelectSingleNode("//h1[@class='broker-info__broker-title h5 mb-0']")?.InnerText.Trim(),
+                                BrokerPhone = detailDoc.DocumentNode.SelectSingleNode("//a[@itemprop='telephone']")?.GetAttributeValue("content", ""),
+                                PhotoCount = int.TryParse(detailDoc.DocumentNode.SelectSingleNode("//button[contains(@class, 'photo-btn') and contains(., 'fa-camera')]")?.InnerText.Replace(" ", "").Replace("\n", "").Split(new[] { "<i" }, StringSplitOptions.None)[0], out var count) ? count : 0,
+                                AdditionalPhotoUrls = new List<string>()
                             };
 
                             // Extract amenities (simplified)
