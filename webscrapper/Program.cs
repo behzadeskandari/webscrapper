@@ -23,6 +23,7 @@ using SeleniumUndetectedChromeDriver;
 using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
 using webscrapper;
+using WorkerService1;
 using WorkerService1.Service;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using UndetectedChromeDriver = SeleniumUndetectedChromeDriver.UndetectedChromeDriver;
@@ -57,7 +58,7 @@ namespace Scrapper
                 }
 
                 // Print scraped properties
-                foreach (var prop in properties)
+                foreach (WorkerService1.Property prop in properties)
                 {
                     Console.WriteLine("Property Details:");
                     Console.WriteLine($"Meta Content: {prop.Meta_Content}");
@@ -88,31 +89,8 @@ namespace Scrapper
                     Console.WriteLine($"Additional Photo URLs: {string.Join(", ", prop.AdditionalPhotoUrls)}");
                     Console.WriteLine(new string('-', 50));
                 }
-
-                // Save to MongoDB
-                var record = properties.Select(p => new Property
-                {
-                    Meta_Content = p.Meta_Content,
-                    Property_URl = p.Property_URl,
-                    PropertyImage = p.PropertyImage,
-                    MlsNumberNoStealth = p.MlsNumberNoStealth,
-                    PriceCurrency = p.PriceCurrency,
-                    Price = p.Price,
-                    Category = p.Category,
-                    Address = p.Address,
-                    Orgazination_Name = p.Orgazination_Name,
-                    Amenities = p.Amenities,
-                    Latetude = p.Latetude,
-                    Longitude = p.Longitude,
-                    Description = p.Description,
-                    FinancialDetails = p.FinancialDetails,
-                    BrokerNames = p.BrokerNames,
-                    BrokerPhones = p.BrokerPhones,
-                    PhotoCount = p.PhotoCount,
-                    AdditionalPhotoUrls = p.AdditionalPhotoUrls
-                }).ToList();
-                await SaveToMongoDB(record);
-
+                var mongoDbService = host.Services.GetRequiredService<MongoDbService>();
+                await mongoDbService.InsertPropertiesAsync(properties);
                 Console.WriteLine($"Scraping completed. Total properties: {properties.Count}");
             }
             catch (Exception ex)
@@ -121,25 +99,7 @@ namespace Scrapper
             }
         }
 
-        private static async Task SaveToMongoDB(List<Property> properties)
-        {
-            try
-            {
-                // MongoDB connection string (replace with your actual connection string)
-                string connectionString = Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING") ?? "mongodb://localhost:27017";
-                var client = new MongoClient(connectionString);
-                var database = client.GetDatabase("PropertyDB"); // Replace with your database name
-                var collection = database.GetCollection<Property>("Properties"); // Replace with your collection name
-
-                // Insert properties into MongoDB
-                await collection.InsertManyAsync(properties);
-                Console.WriteLine($"Successfully saved {properties.Count} properties to MongoDB.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error saving to MongoDB: {ex.Message}");
-            }
-        }
+      
     }
 
 }
