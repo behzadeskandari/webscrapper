@@ -82,8 +82,8 @@ namespace Scrapper
                     {
                         Console.WriteLine($"  {detail.Key}: {detail.Value}");
                     }
-                    Console.WriteLine($"Broker Name: {prop.BrokerName}");
-                    Console.WriteLine($"Broker Phone: {prop.BrokerPhone}");
+                    Console.WriteLine($"Broker Name: {prop.BrokerNames}");
+                    Console.WriteLine($"Broker Phone: {prop.BrokerPhones}");
                     Console.WriteLine($"Photo Count: {prop.PhotoCount}");
                     Console.WriteLine($"Additional Photo URLs: {string.Join(", ", prop.AdditionalPhotoUrls)}");
                     Console.WriteLine(new string('-', 50));
@@ -106,8 +106,8 @@ namespace Scrapper
                     Longitude = p.Longitude,
                     Description = p.Description,
                     FinancialDetails = p.FinancialDetails,
-                    BrokerName = p.BrokerName,
-                    BrokerPhone = p.BrokerPhone,
+                    BrokerNames = p.BrokerNames,
+                    BrokerPhones = p.BrokerPhones,
                     PhotoCount = p.PhotoCount,
                     AdditionalPhotoUrls = p.AdditionalPhotoUrls
                 }).ToList();
