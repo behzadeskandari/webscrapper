@@ -62,10 +62,10 @@ namespace WorkerService1.Service
             try
             {
                 new DriverManager().SetUpDriver(new ChromeConfig());
-                var chromeDriverPath = new DriverManager().SetUpDriver(new ChromeConfig());
-                //var chromeDriverPath = Environment.OSVersion.Platform == PlatformID.Win32NT
-                //    ? "chromedriver.exe"
-                //    : "/usr/local/bin/chromedriver";
+                //var chromeDriverPath = new DriverManager().SetUpDriver(new ChromeConfig());
+                var chromeDriverPath = Environment.OSVersion.Platform == PlatformID.Win32NT
+                    ? "chromedriver.exe"
+                    : "/usr/local/bin/chromedriver";
                 driver = UndetectedChromeDriver.Create(
                     options: chromeOptions,
                     driverExecutablePath: chromeDriverPath,
@@ -357,7 +357,7 @@ namespace WorkerService1.Service
                                 if (walkscoreNode != null)
                                     property.Amenities["WalkScore"] = walkscoreNode.InnerText.Trim();
 
-                                // Check property type
+                                // Check property type (log only once)
                                 var propertyTypeNode = detailDoc.DocumentNode.SelectSingleNode("//h1[@itemprop='category']/span[@data-id='PageTitle']");
                                 var propertyType = propertyTypeNode?.InnerText.Trim() ?? "Unknown";
                                 Console.WriteLine($"Property type: {propertyType} for property {propertyUrl}");
@@ -366,7 +366,7 @@ namespace WorkerService1.Service
                                 bool hasFinancialSection = false;
                                 try
                                 {
-                                    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15)); // Increased timeout to 15 seconds
+                                    wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
                                     wait.Until(d => d.FindElements(By.XPath("//div[@class='financial-details-tables']")).Count > 0);
                                     Console.WriteLine($"Financial details section found for property {propertyUrl}");
                                     hasFinancialSection = true;
@@ -409,8 +409,8 @@ namespace WorkerService1.Service
                                     }
 
                                     // Reload page source after toggling
-                                    var detailHtmls = driver.PageSource;
-                                    detailDoc.LoadHtml(detailHtmls);
+                                    var detailHtmlS = driver.PageSource;
+                                    detailDoc.LoadHtml(detailHtmlS);
                                     File.WriteAllText($"financial_tables_post_toggle_{i}_{timestamp}.html", detailHtml);
 
                                     // Extract financial details
