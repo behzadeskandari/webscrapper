@@ -7,7 +7,10 @@ using System.Runtime.Intrinsics.X86;
 using System.Text.Json;
 using System.Threading;
 using HtmlAgilityPack;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.VisualBasic;
+using MongoDB.Driver;
 using OpenQA.Selenium;
 using OpenQA.Selenium.BiDi.Network;
 using OpenQA.Selenium.BiDi.Script;
@@ -35,10 +38,14 @@ namespace Scrapper
             try
             {
                 Console.WriteLine("Starting the scraper...");
+                    var host = Host.CreateDefaultBuilder(args)
+                    .ConfigureServices((context, services) =>
+                    {
+                        services.AddSingleton<ScraperService>();
+                    })
+                    .Build();
 
-                // Instantiate the scraper service
-                IScraperService scraperService = new ScraperService();
-
+                var scraperService = host.Services.GetRequiredService<ScraperService>();
                 // Scrape properties (e.g., for page 1)
                 int pageToScrape = 1;
                 var properties = await scraperService.ScrapePropertiesAsync(pageToScrape);
@@ -83,7 +90,28 @@ namespace Scrapper
                 }
 
                 // Save to MongoDB
-                await SaveToMongoDB(properties);
+                var record = properties.Select(p => new Property
+                {
+                    Meta_Content = p.Meta_Content,
+                    Property_URl = p.Property_URl,
+                    PropertyImage = p.PropertyImage,
+                    MlsNumberNoStealth = p.MlsNumberNoStealth,
+                    PriceCurrency = p.PriceCurrency,
+                    Price = p.Price,
+                    Category = p.Category,
+                    Address = p.Address,
+                    Orgazination_Name = p.Orgazination_Name,
+                    Amenities = p.Amenities,
+                    Latetude = p.Latetude,
+                    Longitude = p.Longitude,
+                    Description = p.Description,
+                    FinancialDetails = p.FinancialDetails,
+                    BrokerName = p.BrokerName,
+                    BrokerPhone = p.BrokerPhone,
+                    PhotoCount = p.PhotoCount,
+                    AdditionalPhotoUrls = p.AdditionalPhotoUrls
+                }).ToList();
+                await SaveToMongoDB(record);
 
                 Console.WriteLine($"Scraping completed. Total properties: {properties.Count}");
             }
