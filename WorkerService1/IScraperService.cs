@@ -139,138 +139,6 @@ namespace WorkerService1.Service
                             var detailDoc = new HtmlDocument();
                             detailDoc.LoadHtml(detailHtml);
 
-                            //                    var property = new Property
-                            //                    {
-                            //                        Meta_Content = detailDoc.DocumentNode.SelectSingleNode("//meta[@itemprop='name']")?.GetAttributeValue("content", ""),
-                            //                        Property_URl = propertyUrl,
-                            //                        PropertyImage = detailDoc.DocumentNode.SelectSingleNode("//img[@itemprop='image']")?.GetAttributeValue("src", ""),
-                            //                        MlsNumberNoStealth = detailDoc.DocumentNode.SelectSingleNode("//div[@id='MlsNumberNoStealth']//p")?.InnerText.Trim(),
-                            //                        PriceCurrency = detailDoc.DocumentNode.SelectSingleNode("//meta[@itemprop='priceCurrency']")?.GetAttributeValue("content", ""),
-                            //                        Price = detailDoc.DocumentNode.SelectSingleNode("//meta[@itemprop='price']")?.GetAttributeValue("content", ""),
-                            //                        Category = detailDoc.DocumentNode.SelectSingleNode("//div[@itemprop='category']//div")?.InnerText.Trim(),
-                            //                        Address = detailDoc.DocumentNode.SelectNodes("//div[@class='address']//div") is HtmlNodeCollection addressNodes && addressNodes.Count >= 2
-                            //? $"{addressNodes[0]?.InnerText.Trim()}, {addressNodes[1]?.InnerText.Trim()}"
-                            //: "",
-                            //                        Orgazination_Name = detailDoc.DocumentNode.SelectSingleNode("//p[@class='organisation-name']")?.InnerText.Trim(),
-                            //                        Amenities = new Dictionary<string, string>(),
-                            //                        Latetude = detailDoc.DocumentNode.SelectSingleNode("//span[@class='ll-match-score noAnimation']")?.GetAttributeValue("data-lat", ""),
-                            //                        Longitude = detailDoc.DocumentNode.SelectSingleNode("//span[@class='ll-match-score noAnimation']")?.GetAttributeValue("data-lng", ""),
-                            //                        Description = detailDoc.DocumentNode.SelectSingleNode("//div[@itemprop='description']")?.InnerText.Trim(),
-                            //                        FinancialDetails = new Dictionary<string, string>(),
-                            //                        BrokerNames = new List<string>(),
-                            //                        BrokerPhones = new List<string>(),
-                            //                        PhotoCount = int.TryParse(detailDoc.DocumentNode.SelectSingleNode("//button[contains(@class, 'photo-btn') and contains(., 'fa-camera')]")?.InnerText.Replace(" ", "").Replace("\n", "").Split(new[] { "<i" }, StringSplitOptions.None)[0], out var count) ? count : 0,
-                            //                        AdditionalPhotoUrls = new List<string>()
-                            //                    };
-
-                            //                    // Extract multiple brokers
-                            //                    var brokerNodes = detailDoc.DocumentNode.SelectNodes("//div[@class='property-summary-item__brokers-content']//div[@itemtype='https://schema.org/RealEstateAgent']");
-                            //                    if (brokerNodes != null)
-                            //                    {
-                            //                        foreach (var brokerNode in brokerNodes)
-                            //                        {
-                            //                            var brokerName = brokerNode.SelectSingleNode(".//h1[@class='broker-info__broker-title h5 mb-0']")?.InnerText.Trim();
-                            //                            if (!string.IsNullOrEmpty(brokerName))
-                            //                            {
-                            //                                property.BrokerNames.Add(brokerName);
-                            //                            }
-
-                            //                            var phoneNodes = brokerNode.SelectNodes(".//a[@itemprop='telephone']");
-                            //                            if (phoneNodes != null)
-                            //                            {
-                            //                                foreach (var phoneNode in phoneNodes)
-                            //                                {
-                            //                                    var phone = phoneNode.GetAttributeValue("content", "").Trim();
-                            //                                    if (!string.IsNullOrEmpty(phone) && !property.BrokerPhones.Contains(phone))
-                            //                                    {
-                            //                                        property.BrokerPhones.Add(phone);
-                            //                                    }
-                            //                                }
-                            //                            }
-                            //                        }
-                            //                    }
-
-                            //                    // Extract amenities (simplified)
-                            //                    var descriptionNode = detailDoc.DocumentNode.SelectSingleNode("//div[@class='col-lg-12 description']");
-                            //                    if (descriptionNode != null)
-                            //                    {
-                            //                        var teaserNodes = descriptionNode.SelectNodes(".//div[@class='row teaser']//div[contains(@class, 'col-lg-3 col-sm-6')]");
-                            //                        if (teaserNodes != null)
-                            //                        {
-                            //                            foreach (var node in teaserNodes)
-                            //                            {
-                            //                                var className = node.GetAttributeValue("class", "");
-                            //                                var value = node.InnerText.Trim();
-                            //                                if (className.Contains("piece")) property.Amenities["Rooms"] = value;
-                            //                                else if (className.Contains("cac")) property.Amenities["Bedrooms"] = value;
-                            //                                else if (className.Contains("sdb")) property.Amenities["Bathrooms"] = value;
-                            //                                else if (className.Contains("lifestyle"))
-                            //                                    property.Amenities["LifestyleScore"] = node.SelectSingleNode(".//span[@class='ll-score-color-default']")?.InnerText.Trim() ?? "?";
-                            //                            }
-                            //                        }
-
-                            //                        var caracNodes = descriptionNode.SelectNodes(".//div[@class='row']//div[contains(@class, 'carac-container')]");
-                            //                        if (caracNodes != null)
-                            //                        {
-                            //                            foreach (var node in caracNodes)
-                            //                            {
-                            //                                var title = node.SelectSingleNode(".//div[@class='carac-title']")?.InnerText.Trim();
-                            //                                var value = node.SelectSingleNode(".//div[@class='carac-value']//span")?.InnerText.Trim();
-                            //                                if (!string.IsNullOrEmpty(title) && !string.IsNullOrEmpty(value))
-                            //                                    property.Amenities[title] = value;
-                            //                            }
-                            //                        }
-
-                            //                        var walkscoreNode = descriptionNode.SelectSingleNode(".//div[@class='walkscore']//span");
-                            //                        if (walkscoreNode != null)
-                            //                            property.Amenities["WalkScore"] = walkscoreNode.InnerText.Trim();
-                            //                    }
-                            //                    // Extract financial details
-                            //                    var financialTables = detailDoc.DocumentNode.SelectNodes("//div[@class='financial-details-tables']//table[@class='table']");
-                            //                    if (financialTables != null)
-                            //                    {
-                            //                        foreach (var table in financialTables)
-                            //                        {
-                            //                            var tableTitle = table.SelectSingleNode(".//th[@class='col pl-0 financial-details-table-title']")?.InnerText.Trim();
-                            //                            if (string.IsNullOrEmpty(tableTitle)) continue;
-
-                            //                            // Determine if the table is yearly or monthly
-                            //                            var tableClass = table.GetAttributeValue("class", "");
-                            //                            var period = tableClass.Contains("financial-details-table-yearly") ? "Yearly" :
-                            //                                         tableClass.Contains("financial-details-table-monthly") ? "Monthly" : "";
-
-                            //                            // Extract table rows
-                            //                            var rows = table.SelectNodes(".//tbody/tr");
-                            //                            if (rows != null)
-                            //                            {
-                            //                                foreach (var row in rows)
-                            //                                {
-                            //                                    var cells = row.SelectNodes("td");
-                            //                                    if (cells?.Count == 2)
-                            //                                    {
-                            //                                        var key = string.IsNullOrEmpty(period) ? $"{tableTitle} - {cells[0].InnerText.Trim()}" :
-                            //                                                  $"{tableTitle} - {cells[0].InnerText.Trim()} ({period})";
-                            //                                        var value = cells[1].InnerText.Trim();
-                            //                                        property.FinancialDetails[key] = value;
-                            //                                    }
-                            //                                }
-                            //                            }
-
-                            //                            // Extract total
-                            //                            var totalRow = table.SelectSingleNode(".//tfoot/tr[@class='col pl-0 financial-details-table-total']");
-                            //                            if (totalRow != null)
-                            //                            {
-                            //                                var totalCells = totalRow.SelectNodes("td");
-                            //                                if (totalCells?.Count == 2)
-                            //                                {
-                            //                                    var key = string.IsNullOrEmpty(period) ? $"{tableTitle} - Total" :
-                            //                                              $"{tableTitle} - Total ({period})";
-                            //                                    var value = totalCells[1].InnerText.Trim();
-                            //                                    property.FinancialDetails[key] = value;
-                            //                                }
-                            //                            }
-                            //                        }
-                            //                    }
                             var property = new Property
                             {
                                 Meta_Content = detailDoc.DocumentNode.SelectSingleNode("//meta[@itemprop='name']")?.GetAttributeValue("content", ""),
@@ -292,7 +160,8 @@ namespace WorkerService1.Service
                                 BrokerNames = new List<string>(),
                                 BrokerPhones = new List<string>(),
                                 PhotoCount = int.TryParse(detailDoc.DocumentNode.SelectSingleNode("//button[contains(@class, 'photo-btn') and contains(., 'fa-camera')]")?.InnerText.Replace(" ", "").Replace("\n", "").Split(new[] { "<i" }, StringSplitOptions.None)[0], out var count) ? count : 0,
-                                AdditionalPhotoUrls = new List<string>()
+                                AdditionalPhotoUrls = new List<string>(),
+                                GoogleRating = "N/A"
                             };
 
                             // Extract multiple brokers
@@ -357,6 +226,8 @@ namespace WorkerService1.Service
                                 if (walkscoreNode != null)
                                     property.Amenities["WalkScore"] = walkscoreNode.InnerText.Trim();
 
+
+                            
                                 // Check property type (log only once)
                                 var propertyTypeNode = detailDoc.DocumentNode.SelectSingleNode("//h1[@itemprop='category']/span[@data-id='PageTitle']");
                                 var propertyType = propertyTypeNode?.InnerText.Trim() ?? "Unknown";
@@ -722,7 +593,10 @@ namespace WorkerService1.Service
                                 if (walkscoreNode != null)
                                     property.Amenities["WalkScore"] = walkscoreNode.InnerText.Trim();
                             }
-
+                            if (propertyType == "commercial" || property.Category.Contains("Commercial", StringComparison.OrdinalIgnoreCase))
+                            {
+                                property.GoogleRating = await GetGoogleRatingAsync(driver, property.Address, property.Orgazination_Name, timestamp, i);
+                            }
                             // Check property type (log only once)
                             var propertyTypeNode = detailDoc.DocumentNode.SelectSingleNode("//h1[@itemprop='category']/span[@data-id='PageTitle']");
                             var extractedType = propertyTypeNode?.InnerText.Trim() ?? "Unknown";
@@ -934,6 +808,34 @@ namespace WorkerService1.Service
             }
         }
 
+        // New method for extracting Google Rating using Selenium scraping (without API key)
+        private async Task<string> GetGoogleRatingAsync(IWebDriver driver, string address, string organizationName, string timestamp, int index)
+        {
+            try
+            {
+                string searchQuery = string.IsNullOrEmpty(organizationName) ? $"{address} Google rating" : $"{organizationName} at {address} Google rating";
+                string googleUrl = $"https://www.google.com/search?q={Uri.EscapeDataString(searchQuery)}";
 
+                driver.Navigate().GoToUrl(googleUrl);
+                await Task.Delay(5000); // Delay to avoid detection and allow load
+
+                // Extract rating from Google search results (XPath for rating div - may change, check Google DOM)
+                var ratingElement = driver.FindElements(By.CssSelector("div.g div[role='heading'] span[aria-hidden='true']")).FirstOrDefault() ?? driver.FindElements(By.XPath("//div[contains(@class, 'uMdZh')]")).FirstOrDefault();
+                if (ratingElement != null && !string.IsNullOrEmpty(ratingElement.Text))
+                {
+                    Console.WriteLine($"Google rating found: {ratingElement.Text} for address {address}");
+                    return ratingElement.Text.Trim();
+                }
+
+                Console.WriteLine($"No Google rating found for address {address}.");
+                File.WriteAllText($"google_rating_error_{index}_{timestamp}.html", driver.PageSource); // Save for debugging
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error extracting Google rating for address {address}: {ex.Message}");
+            }
+
+            return "N/A";
+        }
     }
 }

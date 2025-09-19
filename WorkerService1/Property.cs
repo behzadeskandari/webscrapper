@@ -26,5 +26,6 @@ namespace WorkerService1
         public List<string> BrokerPhones { get; set; } // Changed to List
         public int PhotoCount { get; set; }
         public List<string> AdditionalPhotoUrls { get; set; }
+        public string GoogleRating { get; internal set; }
     }
 }
