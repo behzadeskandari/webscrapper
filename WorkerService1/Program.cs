@@ -75,8 +75,8 @@ using WorkerService1;
                         cfg.ReceiveEndpoint("scrape-page-queue", e =>
                         {
                             e.ConfigureConsumer<ScrapePageConsumer>(context);
-                            e.ConcurrentMessageLimit = 2;
-                            e.PrefetchCount =2;
+                            e.ConcurrentMessageLimit = 1;
+                            e.PrefetchCount =1;
                         });
                         services.AddSingleton<IConfiguration>(hostContext.Configuration);
                     });
