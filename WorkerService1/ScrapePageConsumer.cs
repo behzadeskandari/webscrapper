@@ -33,21 +33,56 @@ namespace WorkerService1
 
             try
             {
-                List<Property> properties = await retryPolicy.ExecuteAsync(async () =>
+                List<Property> allProperties = new List<Property>();
+                var baseUrls = new List<(string Url, string Type)>
                 {
-                    _logger.LogDebug("Scraping properties for page {PageNumber}...", page);
-                    return await _scraperService.ScrapePropertiesAsync(page); // Pass page number
-                });
+                    ("https://www.centris.ca/en/properties~for-sale?uc=1", "residential"),
+                    ("https://www.centris.ca/en/commercial-properties~for-sale?uc=1", "commercial")
+                };
 
-                if (properties != null && properties.Count > 0)
+                foreach (var (url, type) in baseUrls)
                 {
-                    await _mongoDbService.InsertPropertiesAsync(properties);
-                    _logger.LogInformation("Inserted {PropertyCount} properties from page {PageNumber} into MongoDB.", properties.Count, page);
+                    _logger.LogDebug("Scraping {PropertyType} properties for page {PageNumber} from {Url}...", type, page, url);
+                    List<Property> properties = await retryPolicy.ExecuteAsync(async () =>
+                    {
+                        return await _scraperService.ScrapePropertiesAsync(page, type, url); // Pass page, type, and URL
+                    });
+
+                    if (properties != null && properties.Count > 0)
+                    {
+                        allProperties.AddRange(properties);
+                        _logger.LogInformation("Scraped {PropertyCount} {PropertyType} properties from page {PageNumber}.", properties.Count, type, page);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("No {PropertyType} properties found on page {PageNumber}.", type, page);
+                    }
+                }
+
+                if (allProperties.Count > 0)
+                {
+                    await _mongoDbService.InsertPropertiesAsync(allProperties);
+                    _logger.LogInformation("Inserted {PropertyCount} properties (residential and commercial) from page {PageNumber} into MongoDB.", allProperties.Count, page);
                 }
                 else
                 {
-                    _logger.LogInformation("No properties found on page {PageNumber}.", page);
+                    _logger.LogInformation("No properties found on page {PageNumber} for residential or commercial.", page);
                 }
+                //List<Property> properties = await retryPolicy.ExecuteAsync(async () =>
+                //{
+                //    _logger.LogDebug("Scraping properties for page {PageNumber}...", page);
+                //    return await _scraperService.ScrapePropertiesAsync(page); // Pass page number
+                //});
+
+                //if (properties != null && properties.Count > 0)
+                //{
+                //    await _mongoDbService.InsertPropertiesAsync(properties);
+                //    _logger.LogInformation("Inserted {PropertyCount} properties from page {PageNumber} into MongoDB.", properties.Count, page);
+                //}
+                //else
+                //{
+                //    _logger.LogInformation("No properties found on page {PageNumber}.", page);
+                //}
             }
             catch (Exception ex)
             {
