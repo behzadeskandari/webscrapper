@@ -23,7 +23,6 @@ using SeleniumUndetectedChromeDriver;
 using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
 using webscrapper;
-using WorkerService1;
 using WorkerService1.Service;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using UndetectedChromeDriver = SeleniumUndetectedChromeDriver.UndetectedChromeDriver;
@@ -49,16 +48,27 @@ namespace Scrapper
                 var scraperService = host.Services.GetRequiredService<ScraperService>();
                 // Scrape properties (e.g., for page 1)
                 int pageToScrape = 1;
-                var properties = await scraperService.ScrapePropertiesAsync(pageToScrape);
+                //var properties = await scraperService.ScrapePropertiesAsync(pageToScrape);
+                List<WorkerService1.Property> allProperties = new List<WorkerService1.Property>();
+                var baseUrls = new List<(string Url, string Type)>
+                {
+                    ("https://www.centris.ca/en/commercial-properties~for-sale?uc=1", "commercial"),
+                    ("https://www.centris.ca/en/properties~for-sale?uc=1", "residential")
+                };
 
-                if (properties == null || properties.Count == 0)
+                foreach (var (url, type) in baseUrls)
+                {
+                   List<WorkerService1.Property> prop = await scraperService.ScrapePropertiesAsync(pageToScrape, type, url); // Pass page, type, and URL
+                    allProperties.AddRange(prop);
+                }
+                if (allProperties == null || allProperties.Count == 0)
                 {
                     Console.WriteLine("No properties scraped. Check logs for errors.");
                     return;
                 }
 
                 // Print scraped properties
-                foreach (WorkerService1.Property prop in properties)
+                foreach (WorkerService1.Property prop in allProperties)
                 {
                     Console.WriteLine("Property Details:");
                     Console.WriteLine($"Meta Content: {prop.Meta_Content}");
@@ -89,9 +99,9 @@ namespace Scrapper
                     Console.WriteLine($"Additional Photo URLs: {string.Join(", ", prop.AdditionalPhotoUrls)}");
                     Console.WriteLine(new string('-', 50));
                 }
-                var mongoDbService = host.Services.GetRequiredService<MongoDbService>();
-                await mongoDbService.InsertPropertiesAsync(properties);
-                Console.WriteLine($"Scraping completed. Total properties: {properties.Count}");
+                var mongoDbService = host.Services.GetRequiredService<WorkerService1.MongoDbService>();
+                await mongoDbService.InsertPropertiesAsync(allProperties);
+                Console.WriteLine($"Scraping completed. Total properties: {allProperties.Count}");
             }
             catch (Exception ex)
             {
