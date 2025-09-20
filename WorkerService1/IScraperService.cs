@@ -815,42 +815,38 @@ namespace WorkerService1.Service
         {
             try
             {
-                // Clean address: trim and remove trailing dots or empty parts
-                address = address?.Trim().TrimEnd('.', ',') ?? "";
+                // Clean address: remove unnecessary parts
+                address = address?.Trim().TrimEnd('.', ',').Replace("(", "").Replace(")", "") ?? "";
                 if (string.IsNullOrEmpty(address))
                 {
-                    Console.WriteLine($"Empty address for Google rating extraction.");
+                    Console.WriteLine("Empty address for Google rating extraction.");
                     return "N/A";
                 }
 
-                // Build better query: use organization if available, focus on Maps
-                string searchQuery;
-                if (!string.IsNullOrEmpty(organizationName))
-                {
-                    searchQuery = $"{Uri.EscapeDataString(organizationName)} {Uri.EscapeDataString(address)} rating site:maps.google.com";
-                }
-                else
-                {
-                    searchQuery = $"{Uri.EscapeDataString(address)} rating site:maps.google.com";
-                }
+                // Build simpler search query
+                string searchQuery = string.IsNullOrEmpty(organizationName)
+                    ? $"{Uri.EscapeDataString(address)} rating"
+                    : $"{Uri.EscapeDataString(organizationName)} {Uri.EscapeDataString(address)} rating";
                 string googleUrl = $"https://www.google.com/search?q={searchQuery}";
-
                 Console.WriteLine($"Searching Google for: {searchQuery}");
+
+                // Set random user-agent to avoid detection
+                var chromeOptions = new ChromeOptions();
+                chromeOptions.AddArgument($"--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36");
                 driver.Navigate().GoToUrl(googleUrl);
-                await Task.Delay(8000); // Increased delay to 8 seconds for better load and anti-detection
+                await Task.Delay(10000); // 10 seconds delay for page load
 
-                // Wait for results to load
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-                wait.Until(d => d.FindElements(By.CssSelector("div.g")).Count > 0); // Wait for search results
+                // Wait for results
+                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(15));
+                wait.Until(d => d.FindElements(By.CssSelector("div.g")).Count > 0);
 
-                // Improved selectors for Google rating (updated for 2024/2025 DOM)
-                // Primary: Rating span in knowledge panel or snippet
+                // Updated selectors for 2025 Google DOM
                 var ratingSelectors = new[]
                 {
-            By.XPath("//span[@class='W4PZNc']"), // Common rating class
-            By.XPath("//div[@class='BNeawe iZp4x']//span[contains(@aria-hidden, 'true')]"), // Rating text
-            By.XPath("//div[contains(@class, 'uMdZh') or contains(@class, 'F7nice')]"), // Alternative snippet classes
-            By.CssSelector("span.kno-fb-ctx span[aria-hidden='true']") // Knowledge panel fallback
+            By.XPath("//span[@class='Aq14fc']"), // Common rating in knowledge panel
+            By.XPath("//div[@class='BNeawe iZp4x']//span[contains(@aria-hidden, 'true')]"),
+            By.XPath("//div[contains(@class, 'uMdZh') or contains(@class, 'F7nice')]"),
+            By.CssSelector("span.kno-fb-ctx span[aria-hidden='true']")
         };
 
                 IWebElement ratingElement = null;
@@ -864,31 +860,30 @@ namespace WorkerService1.Service
                     }
                 }
 
-                if (ratingElement != null && !string.IsNullOrEmpty(ratingElement.Text) && ratingElement.Text.Contains("★") || ratingElement.Text.Any(char.IsDigit))
+                if (ratingElement != null && !string.IsNullOrEmpty(ratingElement.Text))
                 {
-                    // Extract just the number, e.g., "4.2" from "4.2 (123 reviews)"
                     var ratingText = ratingElement.Text.Trim();
                     var match = System.Text.RegularExpressions.Regex.Match(ratingText, @"(\d+\.?\d*)");
                     if (match.Success)
                     {
                         Console.WriteLine($"Google rating found: {match.Value} for address {address}");
-                        return match.Value; // Return just "4.2"
+                        return match.Value;
                     }
-                    return ratingText; // Fallback to full text
+                    Console.WriteLine($"Raw rating text: {ratingText}");
+                    return ratingText;
                 }
 
-                // Fallback: Direct to Google Maps search
-                Console.WriteLine($"No rating in search results, trying Google Maps fallback for {address}");
-                string mapsQuery = $"{Uri.EscapeDataString(address)}";
+                // Fallback to Google Maps
+                Console.WriteLine($"No rating in search results, trying Google Maps for {address}");
+                string mapsQuery = Uri.EscapeDataString(address);
                 string mapsUrl = $"https://www.google.com/maps/search/{mapsQuery}";
                 driver.Navigate().GoToUrl(mapsUrl);
-                await Task.Delay(5000);
+                await Task.Delay(7000);
 
-                // Maps-specific selectors
                 var mapsRatingSelectors = new[]
                 {
-            By.XPath("//button[@data-value='1']/../span[@class='MW4etd']"), // Star button parent
-            By.XPath("//div[@class='F7nice'][contains(@aria-label, 'stars')]"), // Rating div
+            By.XPath("//span[@class='MW4etd']"),
+            By.XPath("//div[@class='F7nice'][contains(@aria-label, 'stars')]"),
             By.CssSelector("span[aria-label*='stars']")
         };
 
@@ -898,30 +893,25 @@ namespace WorkerService1.Service
                     if (elements.Count > 0)
                     {
                         var mapsRating = elements[0].GetAttribute("aria-label") ?? elements[0].Text;
-                        if (!string.IsNullOrEmpty(mapsRating) && mapsRating.Contains("★"))
+                        var match = System.Text.RegularExpressions.Regex.Match(mapsRating, @"(\d+\.?\d*)");
+                        if (match.Success)
                         {
-                            var match = System.Text.RegularExpressions.Regex.Match(mapsRating, @"(\d+\.?\d*)");
-                            if (match.Success)
-                            {
-                                Console.WriteLine($"Google Maps rating found: {match.Value} for address {address}");
-                                return match.Value;
-                            }
+                            Console.WriteLine($"Google Maps rating found: {match.Value} for address {address}");
+                            return match.Value;
                         }
-                        break;
                     }
                 }
 
-                Console.WriteLine($"No Google rating found even in Maps fallback for address {address}.");
-                File.WriteAllText($"google_rating_error_{index}_{timestamp}.html", driver.PageSource); // Save for debugging
+                Console.WriteLine($"No Google rating found for address {address}.");
+                File.WriteAllText($"google_rating_error_{index}_{timestamp}.html", driver.PageSource);
+                return "N/A";
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error extracting Google rating for address {address}: {ex.Message}");
                 File.WriteAllText($"google_rating_exception_{index}_{timestamp}.html", driver?.PageSource ?? "No page source");
+                return "N/A";
             }
-
-            return "N/A";
         }
-
     }
 }
