@@ -210,6 +210,7 @@ namespace WorkerService1.Service
                                     }
                                 }
 
+
                                 var caracNodes = descriptionNode.SelectNodes(".//div[@class='row']//div[contains(@class, 'carac-container')]");
                                 if (caracNodes != null)
                                 {
